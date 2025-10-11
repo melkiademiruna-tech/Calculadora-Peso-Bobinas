@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Peso de Bobinas</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a84ff">
+
+    <!-- Estilos básicos -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0a84ff;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 { text-align: center; margin-bottom: 20px; }
+        .container {
+            background-color: #fff;
+            color: #000;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 400px;
+            margin: auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        label { display: block; margin-top: 10px; font-weight: bold; }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 10px;
+            background-color: #0a84ff;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover { background-color: #0066cc; }
+        #resultado {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Calculadora de Peso de Bobinas</h1>
+    <div class="container">
+        <label for="gramaje">Gramaje del papel (g/m²)</label>
+        <input type="number" id="gramaje" placeholder="Ej: 80">
+
+        <label for="ancho">Ancho de la bobina (mm)</label>
+        <input type="number" id="ancho" placeholder="Ej: 1000">
+
+        <label for="diamExt">Diámetro exterior de la bobina (mm)</label>
+        <input type="number" id="diamExt" placeholder="Ej: 1200">
+
+        <label for="diamMandril">Diámetro del mandril (mm)</label>
+        <input type="number" id="diamMandril" placeholder="Ej: 76">
+
+        <label for="tipoPapel">Tipo de papel</label>
+        <select id="tipoPapel">
+            <option value="calibre1">Papel 1 - 0.08 mm</option>
+            <option value="calibre2">Papel 2 - 0.10 mm</option>
+            <option value="calibre3">Papel 3 - 0.12 mm</option>
+            <option value="calibre4">Papel 4 - 0.15 mm</option>
+            <option value="calibre5">Papel 5 - 0.18 mm</option>
+            <option value="calibre6">Papel 6 - 0.20 mm</option>
+            <option value="calibre7">Papel 7 - 0.25 mm</option>
+            <option value="calibre8">Papel 8 - 0.30 mm</option>
+            <option value="calibre9">Papel 9 - 0.35 mm</option>
+            <option value="calibre10">Papel 10 - 0.40 mm</option>
+            <option value="manual">Ingresar calibre manual</option>
+        </select>
+
+        <label for="calibreManual">Calibre (mm) — solo si eliges manual</label>
+        <input type="number" id="calibreManual" placeholder="Ej: 0.1">
+
+        <button onclick="calcularPeso()">Calcular Peso (kg)</button>
+
+        <div id="resultado"></div>
+    </div>
+
+    <script>
+        // Valores de calibre por tipo de papel
+        const calibres = {
+            "calibre1": 0.08,
+            "calibre2": 0.10,
+            "calibre3": 0.12,
+            "calibre4": 0.15,
+            "calibre5": 0.18,
+            "calibre6": 0.20,
+            "calibre7": 0.25,
+            "calibre8": 0.30,
+            "calibre9": 0.35,
+            "calibre10": 0.40
+        };
+
+        function calcularPeso() {
+            const gramaje = parseFloat(document.getElementById("gramaje").value);
+            const ancho = parseFloat(document.getElementById("ancho").value);
+            const diamExt = parseFloat(document.getElementById("diamExt").value);
+            const diamMandril = parseFloat(document.getElementById("diamMandril").value);
+            const tipo = document.getElementById("tipoPapel").value;
+            let calibre = tipo === "manual" ? parseFloat(document.getElementById("calibreManual").value) : calibres[tipo];
+
+            if (!gramaje || !ancho || !diamExt || !diamMandril || !calibre) {
+                alert("Por favor, completa todos los campos.");
+                return;
+            }
+
+            // Fórmula de cálculo del peso en kg
+            // Peso = (Ancho * Gramaje * (DiamExt^2 - DiamMandril^2) * pi / 4000)
+            const pi = Math.PI;
+            const peso = (ancho * gramaje * pi * (Math.pow(diamExt/2,2) - Math.pow(diamMandril/2,2))) / 1000000;
+            
+            document.getElementById("resultado").innerText = `Peso aproximado: ${peso.toFixed(2)} kg`;
+        }
+    </script>
+
+    <!-- Service Worker -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('Service Worker registrado'))
+        .catch(err => console.log('Error registrando SW:', err));
+      }
+    </script>
+</body>
+</html>
