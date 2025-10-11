@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Peso de Bobinas</title>
+    
+    <!-- Manifest y tema PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a84ff">
+
+    <!-- Aquí puedes agregar tus estilos CSS -->
+    <link rel="stylesheet" href="estilos.css"> <!-- si tienes -->
+</head>
+<body>
+    <!-- ============================= -->
+    <!-- CONTENIDO DE TU CALCULADORA -->
+    <!-- ============================= -->
+    
+    <!-- Ejemplo: reemplaza con tu código actual -->
+    <h1>Calculadora de Peso de Bobinas</h1>
+    <p>Tu contenido HTML de la calculadora va aquí.</p>
+
+    <!-- ============================= -->
+    <!-- REGISTRO DEL SERVICE WORKER -->
+    <!-- ============================= -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('Service Worker registrado'))
+        .catch(err => console.log('Error registrando SW:', err));
+      }
+    </script>
+
+    <!-- Aquí puedes agregar tus scripts JS -->
+    <script src="script.js"></script> <!-- si tienes -->
+</body>
+</html>
