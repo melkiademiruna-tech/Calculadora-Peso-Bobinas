@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Peso Bobinas</title>
+    <link rel="icon" href="icono-bobina.png" type="image/png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f8fc;
+            color: #222;
+            padding: 20px;
+            max-width: 500px;
+            margin: auto;
+        }
+        h1 {
+            text-align: center;
+            color: #0d47a1;
+        }
+        select, input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background: #0d47a1;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #1565c0;
+        }
+        #resultado {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            color: #0d47a1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Calculadora de Peso de Bobinas</h1>
+
+    <label for="tipoPapel">Tipo de papel:</label>
+    <select id="tipoPapel">
+        <option value="">Selecciona un tipo de papel</option>
+        <option value="offset80">Offset 80 g/m²</option>
+        <option value="bond90">Bond 90 g/m²</option>
+        <option value="couche115">Couché brillo 115 g/m²</option>
+        <option value="couche135">Couché brillo 135 g/m²</option>
+        <option value="reciclado70">Reciclado 70 g/m²</option>
+        <option value="kraft100">Kraft 100 g/m²</option>
+        <option value="estucado90">Estucado mate 90 g/m²</option>
+        <option value="autocopiativo60">Autocopiativo 60 g/m²</option>
+        <option value="biblia40">Biblia 40 g/m²</option>
+        <option value="termico59">Térmico 59 g/m²</option>
+        <option value="manual">Ingresar espesor manual</option>
+    </select>
+
+    <div id="campoManual" style="display:none;">
+        <label for="calibre">Espesor (mm):</label>
+        <input type="number" id="calibre" step="0.001" placeholder="Ejemplo: 0.072">
+    </div>
+
+    <label for="gramaje">Gramaje (g/m²):</label>
+    <input type="number" id="gramaje" step="0.1" placeholder="Ejemplo: 80">
+
+    <label for="ancho">Ancho (mm):</label>
+    <input type="number" id="ancho" step="1" placeholder="Ejemplo: 2060">
+
+    <label for="diametro">Diámetro exterior (mm):</label>
+    <input type="number" id="diametro" step="1" placeholder="Ejemplo: 1530">
+
+    <label for="mandril">Diámetro del mandril (mm):</label>
+    <input type="number" id="mandril" step="1" placeholder="Ejemplo: 152">
+
+    <button onclick="calcularPeso()">Calcular peso</button>
+
+    <div id="resultado"></div>
+
+    <script>
+        const calibres = {
+            offset80: 0.100,
+            bond90: 0.110,
+            couche115: 0.090,
+            couche135: 0.100,
+            reciclado70: 0.095,
+            kraft100: 0.125,
+            estucado90: 0.085,
+            autocopiativo60: 0.070,
+            biblia40: 0.045,
+            termico59: 0.072
+        };
+
+        document.getElementById("tipoPapel").addEventListener("change", function() {
+            const tipo = this.value;
+            document.getElementById("campoManual").style.display = (tipo === "manual") ? "block" : "none";
+        });
+
+        function calcularPeso() {
+            const tipoPapel = document.getElementById("tipoPapel").value;
+            const gramaje = parseFloat(document.getElementById("gramaje").value);
+            const ancho = parseFloat(document.getElementById("ancho").value) / 1000; // mm → m
+            const diametro = parseFloat(document.getElementById("diametro").value) / 1000;
+            const mandril = parseFloat(document.getElementById("mandril").value) / 1000;
+
+            let calibre = tipoPapel === "manual" 
+                ? parseFloat(document.getElementById("calibre").value) / 1000 
+                : calibres[tipoPapel] / 1000;
+
+            if (!gramaje || !ancho || !diametro || !mandril || !calibre) {
+                document.getElementById("resultado").innerHTML = "Por favor, completa todos los campos.";
+                return;
+            }
+
+            const longitud = (Math.PI * (Math.pow(diametro, 2) - Math.pow(mandril, 2))) / (4 * calibre);
+            const area = longitud * ancho;
+            const peso = (area * gramaje) / 1000;
+
+            document.getElementById("resultado").innerHTML = `Peso aproximado: <b>${peso.toFixed(2)} kg</b>`;
+        }
+    </script>
+</body>
+</html>
