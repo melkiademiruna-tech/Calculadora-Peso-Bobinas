@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora Peso Bobinas</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" sizes="192x192" href="icon-192.png">
+  <link rel="icon" sizes="512x512" href="icon-512.png">
+  <meta name="theme-color" content="#1976d2">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+      color: #0d47a1;
+    }
+    header {
+      background-color: #1976d2;
+      color: white;
+      text-align: center;
+      padding: 1em;
+      font-size: 1.4em;
+      font-weight: bold;
+    }
+    main {
+      margin: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #90caf9;
+      border-radius: 8px;
+      font-size: 1em;
+    }
+    button {
+      width: 100%;
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1565c0;
+    }
+    .resultado {
+      margin-top: 15px;
+      font-size: 1.2em;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>Calculadora de Peso de Bobinas</header>
+  <main>
+    <div class="card">
+      <label for="gramaje">Gramaje (g/m²):</label>
+      <input type="number" step="any" inputmode="decimal" id="gramaje" placeholder="Ej. 59">
+
+      <label for="espesor">Espesor (μm):</label>
+      <input type="number" step="any" inputmode="decimal" id="espesor" placeholder="Ej. 65">
+
+      <label for="diametroBobina">Diámetro de la bobina (mm):</label>
+      <input type="number" step="any" inputmode="decimal" id="diametroBobina" placeholder="Ej. 1530">
+
+      <label for="diametroMandril">Diámetro del mandril (mm):</label>
+      <input type="number" step="any" inputmode="decimal" id="diametroMandril" placeholder="Ej. 152">
+
+      <label for="ancho">Ancho de la bobina (mm):</label>
+      <input type="number" step="any" inputmode="decimal" id="ancho" placeholder="Ej. 2060">
+
+      <button onclick="calcularPeso()">Calcular Peso</button>
+      <div class="resultado" id="resultado"></div>
+    </div>
+  </main>
+
+  <script>
+    function calcularPeso() {
+      const gramaje = parseFloat(document.getElementById('gramaje').value);
+      const espesor = parseFloat(document.getElementById('espesor').value);
+      const diametroBobina = parseFloat(document.getElementById('diametroBobina').value);
+      const diametroMandril = parseFloat(document.getElementById('diametroMandril').value);
+      const ancho = parseFloat(document.getElementById('ancho').value);
+
+      if (isNaN(gramaje) || isNaN(diametroBobina) || isNaN(diametroMandril) || isNaN(ancho)) {
+        document.getElementById('resultado').innerText = "Por favor, introduce todos los valores.";
+        return;
+      }
+
+      // Convertir milímetros a metros
+      const ancho_m = ancho / 1000;
+      const dBobina_m = diametroBobina / 1000;
+      const dMandril_m = diametroMandril / 1000;
+
+      // Calcular longitud del papel (m)
+      const longitud = (Math.PI / 4) * ((dBobina_m ** 2 - dMandril_m ** 2) / (espesor / 1000000));
+
+      // Calcular peso (kg)
+      const peso = (gramaje * ancho_m * longitud) / 1000;
+
+      document.getElementById('resultado').innerText = `Peso aproximado: ${peso.toFixed(2)} kg`;
+    }
+  </script>
+</body>
+</html>
