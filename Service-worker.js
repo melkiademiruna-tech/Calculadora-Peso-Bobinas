@@ -1,5 +1,5 @@
 // 🌀 Service Worker para la Calculadora de Peso de Bobinas
-// Versión actual: v4.o — recuerda aumentar el número en cada actualización
+// Versión actual: v4.0 — recuerda aumentar el número en cada actualización
 const CACHE_NAME = 'bobinas-cache-v4.0';
 
 // Archivos que se almacenan en caché para el modo offline
@@ -40,6 +40,7 @@ self.addEventListener('activate', event => {
       .then(() => self.clients.claim())
   );
 });
+
 
 
 
