@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Calculadoras de papel</title>
+  <meta name="theme-color" content="#0a67b5" />
+  <!-- PWA (sin cambios) -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" sizes="192x192" href="icon-192.png" />
+  <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
+
+  <style>
+    :root{
+      --brand:#0a67b5;
+      --brand-2:#0d7bd6;
+      --accent:#ff7a00;
+      --accent-600:#e86e00;
+      --bg:#f7fafc;
+      --text:#1f2937;
+      --border:#e5e7eb;
+      --card:#ffffff;
+      --shadow:0 3px 14px rgba(0,0,0,.06);
+      --shadow-lg:0 10px 30px rgba(0,0,0,.10);
+      --radius:14px;
+
+      --active:#0a67b5;        /* azul activo pestañas/subpestañas */
+      --active-text:#ffffff;
+
+      /* Resultados (cambio pedido) */
+      --result-bg:#1d7fd9;     /* azul claro */
+      --result-fg:#ffffff;     /* texto blanco */
+      --result-border:#ffffff33;
+
+      /* Beige educativo exclusivo Tipos de papel */
+      --beige:#f9f2e7;
+      --edu-tq:#3fb5ad;        /* turquesa */
+      --edu-vd:#4caf50;        /* verde */
+      --edu-na:#ff914d;        /* naranja */
+      --edu-ga:#5b7c99;        /* gris azulado */
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0; background:var(--bg); color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans";
+      display:flex; flex-direction:column; min-height:100vh;
+    }
+
+    /* Header (degradado original, icono a la izquierda) */
+    header{
+      position:sticky; top:0; z-index:50;
+      background:linear-gradient(180deg,var(--brand) 0%,var(--brand-2) 100%);
+      color:#fff; padding:12px 16px; box-shadow:0 4px 16px rgba(0,0,0,.12);
+    }
+    .header-inner{max-width:1100px; margin:0 auto; display:flex; align-items:center; gap:12px}
+    .app-logo{width:40px;height:40px;border-radius:8px;overflow:hidden;display:block;border:1px solid #ffffff33;background:#ffffff22}
+    .app-logo img{width:100%;height:100%;object-fit:cover;display:block}
+    .title{display:flex;align-items:center;gap:10px}
+    .title span{font-weight:800;font-size:20px;letter-spacing:.2px}
+
+    main{flex:1}
+    .container{max-width:1100px; margin:18px auto 84px; padding:0 16px}
+
+    /* Pestañas principales (centradas + activa azul) */
+    .tabs{display:flex; justify-content:center; gap:10px; margin-bottom:16px; flex-wrap:wrap}
+    .tab-btn{
+      border:none; cursor:pointer; background:var(--accent); color:#fff;
+      padding:10px 14px; border-radius:999px; font-weight:700;
+      box-shadow:var(--shadow); transition:.18s transform ease,.18s box-shadow ease,.18s background ease;
+    }
+    .tab-btn:hover{transform:translateY(-1px); box-shadow:var(--shadow-lg)}
+    .tab-btn[aria-selected="true"]{ background:var(--active); color:var(--active-text); outline:none }
+
+    /* Tarjetas/Secciones */
+    section.card{
+      background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+      box-shadow:var(--shadow); padding:16px; margin-bottom:18px
+    }
+    .section[hidden]{display:none !important;}
+    h2{margin:0 0 12px; font-size:20px; text-align:center}
+    label{font-weight:600; font-size:13px}
+
+    /* Inputs (teclado numérico, ambos separadores) */
+    input,select{
+      width:100%; padding:10px 12px; border-radius:10px;
+      border:1px solid var(--border); background:#fff; color:var(--text); font-size:15px; outline:none;
+      transition:.15s box-shadow ease,.15s border-color ease;
+    }
+    input:focus,select:focus{ box-shadow:0 0 0 3px rgba(10,103,181,.25); border-color:#b3d6f1 }
+
+    /* Grid */
+    .grid{display:grid; gap:12px; grid-template-columns:repeat(12,1fr)}
+    .col-12{grid-column:span 12}
+    .col-6{grid-column:span 6}
+    .col-4{grid-column:span 4}
+    @media (max-width:860px){ .col-6,.col-4{grid-column:span 12} }
+
+    /* Botones */
+    .btn{
+      border:none; cursor:pointer; background:var(--accent); color:#fff;
+      padding:12px 14px; border-radius:12px; font-weight:800;
+      transition:.18s transform ease,.18s box-shadow ease,.18s background ease;
+    }
+    .btn:hover{transform:translateY(-1px); box-shadow:var(--shadow-lg); background:#e86e00}
+    .btn.secondary{background:#e5e7eb; color:#1f2937}
+    .btn.small{padding:8px 12px; border-radius:10px; font-weight:700}
+
+    /* Resultados centrados (fondo azul claro + texto blanco + borde) */
+    .result-list,.result-group{
+      display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center
+    }
+    .result{
+      background:var(--result-bg); color:var(--result-fg);
+      border:1px solid var(--result-border); border-radius:12px;
+      padding:12px 16px; width:100%; max-width:520px; box-shadow:var(--shadow);
+    }
+
+    /* Subpestañas (centradas + activa azul) */
+    .subtabs{display:flex; justify-content:center; gap:8px; margin:8px 0 14px; flex-wrap:wrap}
+    .subtab-btn{
+      background:#ffe4d1; color:#7a3e00; border:none; cursor:pointer;
+      padding:8px 12px; border-radius:999px; font-weight:800; box-shadow:var(--shadow);
+      transition:.18s transform ease,.18s box-shadow ease,.18s background ease;
+    }
+    .subtab-btn:hover{transform:translateY(-1px); box-shadow:var(--shadow-lg)}
+    .subtab-btn[aria-selected="true"], .subtab-btn.active{ background:var(--active); color:var(--active-text) }
+
+    /* ===== Tipos de papel — Estilo Beige educativo (solo en esa pestaña) ===== */
+    .tipos-wrap{
+      background:var(--beige); border:1px solid #ecdcca; border-radius:var(--radius);
+      box-shadow:var(--shadow); padding:12px;
+    }
+    .subtabs.center{justify-content:center}
+    .type-grid{display:grid; gap:10px; grid-template-columns:repeat(12,1fr)}
+    .type-btn{
+      grid-column:span 3; min-height:48px; background:#fff; border:1px solid #e8e2d8; border-radius:12px; box-shadow:var(--shadow);
+      display:flex; align-items:center; justify-content:center; text-align:center; padding:10px; font-weight:800; color:#2a3b47; cursor:pointer;
+      transition:.18s transform ease,.18s box-shadow ease,.18s border-color ease;
+    }
+    .type-btn:hover{transform:translateY(-2px); box-shadow:var(--shadow-lg); border-color:#e0d6c7}
+    @media (max-width:980px){.type-btn{grid-column:span 6}}
+    @media (max-width:640px){.type-btn{grid-column:span 12}}
+
+    .pill{display:inline-flex; align-items:center; gap:8px; padding:7px 10px; border-radius:999px; font-weight:800; font-size:12px; color:#fff; box-shadow:var(--shadow)}
+    .pill.tq{background:var(--edu-tq)} .pill.vd{background:var(--edu-vd)} .pill.na{background:var(--edu-na)} .pill.ga{background:var(--edu-ga)}
+
+    /* Modal (se estiliza en Parte 3) */
+
+    /* Footer centrado */
+    footer{
+      position:fixed; bottom:0; left:0; width:100%;
+      background:#ffffffd9; backdrop-filter:saturate(1.3) blur(6px);
+      border-top:1px solid var(--border); color:#4b5563; padding:10px 16px;
+      text-align:center; font-weight:700;
+    }
+  </style>
+</head>
+<body>
+  <!-- Encabezado -->
+  <header>
+    <div class="header-inner" role="banner">
+      <a class="app-logo" aria-label="Icono de la aplicación">
+        <img src="icon-192.png" alt="Icono aplicación" />
+      </a>
+      <div class="title">
+        <span>Calculadoras de papel</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <!-- Pestañas principales (centradas, activa azul) -->
+      <nav class="tabs" role="tablist" aria-label="Pestañas principales">
+        <button class="tab-btn" role="tab" aria-selected="true"  aria-controls="sec-bobina" id="tab-bobina">Bobina de papel</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="sec-resma"  id="tab-resma">Papel resmado</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="sec-tipos"  id="tab-tipos">Tipos de papel</button>
+      </nav>
+
+      <!-- ========= Bobina de papel ========= -->
+      <section id="sec-bobina" class="section card" role="tabpanel" aria-labelledby="tab-bobina">
+        <h2>Calculadora — Bobina de papel</h2>
+        <div class="grid">
+          <div class="col-6">
+            <label for="gramaje">Gramaje (g/m²)</label>
+            <input id="gramaje" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" />
+          </div>
+          <div class="col-6">
+            <label for="espesor">Espesor / calibre (µm)</label>
+            <input id="espesor" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" />
+          </div>
+          <div class="col-6">
+            <label for="ancho">Ancho bobina (mm)</label>
+            <input id="ancho" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" />
+          </div>
+          <div class="col-6">
+            <label for="diametro">Diámetro exterior D (mm)</label>
+            <input id="diametro" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" />
+          </div>
+          <div class="col-6">
+            <label for="mandril">Diámetro mandril d (mm)</label>
+            <input id="mandril" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" />
+          </div>
+
+          <div class="col-12">
+            <button id="calc-bobina" class="btn">CALCULAR PESO</button>
+            <button id="reset-bobina" class="btn secondary">Limpiar</button>
+          </div>
+
+          <!-- Resultados (centrados y con fondo azul claro) -->
+          <div class="col-12">
+            <div id="res-bobina" class="result-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========= Papel resmado ========= -->
+      <section id="sec-resma" class="section card" role="tabpanel" aria-labelledby="tab-resma" hidden>
+        <h2>Papel resmado</h2>
+
+        <!-- Subpestañas centradas (activa azul) -->
+        <nav class="subtabs" role="tablist" aria-label="Subpestañas resma">
+          <button class="subtab-btn" role="tab" aria-selected="true"  aria-controls="sub-peso-resma"    id="tab-peso-resma">Peso de la resma</button>
+          <button class="subtab-btn" role="tab" aria-selected="false" aria-controls="sub-pliegos-peso"  id="tab-pliegos-peso">Nº pliegos por peso</button>
+          <button class="subtab-btn" role="tab" aria-selected="false" aria-controls="sub-pliegos-bobina" id="tab-pliegos-bobina">Nº pliegos desde bobina</button>
+        </nav>
+
+        <!-- Sub 1: Peso de la resma -->
+        <div id="sub-peso-resma" class="subsection">
+          <div class="grid">
+            <div class="col-4">
+              <label for="r-gramaje">Gramaje (g/m²)</label>
+              <input id="r-gramaje" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" />
+            </div>
+            <div class="col-4">
+              <label for="r-ancho">Ancho hoja (mm)</label>
+              <input id="r-ancho" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" />
+            </div>
+            <div class="col-4">
+              <label for="r-largo">Largo hoja (mm)</label>
+              <input id="r-largo" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" />
+            </div>
+            <div class="col-4">
+              <label for="r-pliegos">Número de pliegos</label>
+              <input id="r-pliegos" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" />
+            </div>
+            <div class="col-12">
+              <button id="calc-resma" class="btn">CALCULAR</button>
+              <button id="reset-resma" class="btn secondary">Limpiar</button>
+            </div>
+            <div class="col-12">
+              <div id="res-resma" class="result-group"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub 2: Nº pliegos por peso -->
+        <div id="sub-pliegos-peso" class="subsection" hidden>
+          <div class="grid">
+            <div class="col-4">
+              <label for="pp-gramaje">Gramaje (g/m²)</label>
+              <input id="pp-gramaje" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" />
+            </div>
+            <div class="col-4">
+              <label for="pp-ancho">Ancho hoja (mm)</label>
+              <input id="pp-ancho" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" />
+            </div>
+            <div class="col-4">
+              <label for="pp-largo">Largo hoja (mm)</label>
+              <input id="pp-largo" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" />
+            </div>
+            <div class="col-4">
+              <label for="pp-peso">Peso total disponible (kg)</label>
+              <input id="pp-peso" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" />
+            </div>
+            <div class="col-12">
+              <button id="calc-pliegos-peso" class="btn">CALCULAR</button>
+              <button id="reset-pliegos-peso" class="btn secondary">Limpiar</button>
+            </div>
+            <div class="col-12">
+              <div id="res-pliegos-peso" class="result-group"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub 3: Nº pliegos desde bobina (sin merma) -->
+        <div id="sub-pliegos-bobina" class="subsection" hidden>
+          <div class="grid">
+            <div class="col-6">
+              <label for="pb-metros">Metros lineales disponibles (m)</label>
+              <input id="pb-metros" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" />
+            </div>
+            <div class="col-6">
+              <label for="pb-largo">Largo de cada pliego (mm)</label>
+              <input id="pb-largo" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" />
+            </div>
+            <div class="col-12">
+              <button id="calc-pliegos-bobina" class="btn">CALCULAR</button>
+              <button id="reset-pliegos-bobina" class="btn secondary">Limpiar</button>
+            </div>
+            <div class="col-12">
+              <div id="res-pliegos-bobina" class="result-group"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========= Tipos de papel (con fondo beige educativo) ========= -->
+      <section id="sec-tipos" class="section card" role="tabpanel" aria-labelledby="tab-tipos" hidden>
+        <div class="tipos-wrap">
+          <h2>Tipos de papel</h2>
+
+          <!-- Subpestañas centradas (activa en azul) -->
+          <nav class="subtabs center" role="tablist" aria-label="Subpestañas tipos de papel">
+            <button class="subtab-btn active" role="tab" aria-selected="true"  aria-controls="tipos-virgenes"   id="tab-t-virgenes">🌲 Fibras vírgenes</button>
+            <button class="subtab-btn"        role="tab" aria-selected="false" aria-controls="tipos-reciclados" id="tab-t-reciclados">♻️ Fibras recicladas</button>
+            <button class="subtab-btn"        role="tab" aria-selected="false" aria-controls="tipos-tecnicos"   id="tab-t-tecnicos">🧩 Papeles técnicos y autoadhesivos</button>
+            <button class="subtab-btn"        role="tab" aria-selected="false" aria-controls="tipos-guia"       id="tab-t-guia">📘 Guía rápida</button>
+          </nav>
+
+           <!-- 🌲 FIBRAS VÍRGENES -->
+<div id="tipos-virgenes" class="subsection">
+  <div class="type-grid">
+    <button class="type-btn pill tq" data-tipo="GT1 / SBS">GT1 / SBS<br><small>(Solid Bleached Board)</small></button>
+    <button class="type-btn pill vd" data-tipo="GC1 (FBB)">GC1 (FBB)<br><small>(Folding Boxboard doble estucado)</small></button>
+    <button class="type-btn pill na" data-tipo="GC2 (FBB)">GC2 (FBB)<br><small>(Folding Boxboard simple estucado)</small></button>
+    <button class="type-btn pill ga" data-tipo="GK / SU">GK / SU<br><small>(Kraft Board / Solid Unbleached)</small></button>
+    <button class="type-btn pill tq" data-tipo="Woodfree / Bond">Woodfree / Bond<br><small>(Offset virgen)</small></button>
+  </div>
+</div>
+
+<!-- ♻️ FIBRAS RECICLADAS -->
+<div id="tipos-reciclados" class="subsection" hidden>
+  <div class="type-grid">
+    <button class="type-btn pill tq" data-tipo="GD2 (WLC)">GD2 (WLC)<br><small>White Lined Chipboard — Greyback</small></button>
+    <button class="type-btn pill vd" data-tipo="GD3 (WLC)">GD3 (WLC)<br><small>WLC económico</small></button>
+    <button class="type-btn pill na" data-tipo="GT2 / GD1">GT2 / GD1<br><small>White Back Chipboard</small></button>
+    <button class="type-btn pill ga" data-tipo="TL / RKL">TL / RKL<br><small>Testliner / Recycled Kraftliner</small></button>
+    <button class="type-btn pill tq" data-tipo="Chipboard / CC">Chipboard / CC<br><small>Cartón gris / Coated Chipboard</small></button>
+    <button class="type-btn pill vd" data-tipo="NP / RNP">NP / RNP<br><small>Newsprint reciclado</small></button>
+  </div>
+</div>
+
+<!-- 🧩 PAPELES TÉCNICOS Y AUTOADHESIVOS -->
+<div id="tipos-tecnicos" class="subsection" hidden>
+  <div class="type-grid">
+    <button class="type-btn pill tq" data-tipo="Térmico blanco">Soporte térmico blanco<br><small>(Thermal Top / ZM7, ZM9)</small></button>
+    <button class="type-btn pill vd" data-tipo="Térmico color">Soporte térmico de color<br><small>(Base amarilla, azul o rosa)</small></button>
+    <button class="type-btn pill na" data-tipo="Autoadhesivo blanco">Papel autoadhesivo blanco<br><small>(vellum)</small></button>
+    <button class="type-btn pill ga" data-tipo="Couché autoadhesivo">Papel couché autoadhesivo<br><small>(C1S / C2S)</small></button>
+    <button class="type-btn pill na" data-tipo="Autoadhesivo color">Autoadhesivo de color / fluorescente</button>
+  </div>
+</div>
+
+<!-- 📘 GUÍA RÁPIDA -->
+<div id="tipos-guia" class="subsection" hidden>
+  <div class="result-list" style="background:#ffffffd0;padding:14px;border-radius:12px;max-width:700px;margin:auto">
+    <h3>⭐ Listado por nivel de calidad</h3>
+    <p><b>Lujo extremo:</b> GT1 / SBS — perfumería, chocolates, cosmética premium.</p>
+    <p><b>Premium alto:</b> GC1 — cosmética/farma premium, impresión por ambas caras.</p>
+    <p><b>Estándar alto:</b> GC2, Woodfree — alimentación seca, farma estándar, editorial.</p>
+    <p><b>Funcional resistente (eco look):</b> GK / SU — bolsas, sacos, bandejas, cajas naturales.</p>
+    <p><b>Económico gráfico (reciclado estucado):</b> GD2, GD3, GT2/GD1 — cereales, juguetes, packaging secundario.</p>
+    <p><b>Embalaje / corrugado:</b> TL / RKL — liners y cajas logísticas.</p>
+    <p><b>Masivo / gran tirada:</b> NP / RNP — prensa, catálogos.</p>
+    <p><b>Funcional técnico:</b> Soportes térmicos, autoadhesivos — etiquetas, tickets, trazabilidad.</p>
+    <div class="note">
+      <b>🧠 Reglas rápidas:</b><br>
+      GT1/SBS → máxima blancura y lujo.<br>
+      GC1 &gt; GC2 → doble vs simple estucado.<br>
+      Kraft (GK) = resistencia y aspecto natural.<br>
+      GD → reciclado con cara blanca; GD2 estándar.<br>
+      TL/RKL → liner para cajas.<br>
+      NP → prensa.<br>
+      Autoadhesivos/térmicos → etiquetas y tickets.
+    </div>
+  </div>
+</div>
+    </section>
+
+    </div>
+  </main>
+
+  <!-- Footer centrado -->
+  <footer>© Mihai Florea — Perellón S.L.</footer>
+
+  <!-- 🔜 Parte 3/4: Modal y scripts base se insertarán al final del body --><!-- ===== MODAL (cuadros informativos de tipos de papel) ===== -->
+<dialog id="modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-title" style="font-weight:800;color:#0a67b5;font-size:18px"></div>
+      <button id="modal-close" class="btn small">Cerrar</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</dialog>
+
+<style>
+  dialog {
+    border: none;
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    width: min(800px, 92vw);
+  }
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.4);
+  }
+  .modal {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #f9fafb;
+  }
+  .modal-body {
+    padding: 16px 18px;
+    background: #ffffff;
+  }
+  .modal-body table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 10px;
+  }
+  .modal-body th, .modal-body td {
+    border: 1px solid #e5e7eb;
+    padding: 8px 10px;
+    text-align: left;
+  }
+  .modal-body th {
+    background: #0a67b5;
+    color: white;
+    font-weight: 700;
+  }
+  .modal-body td {
+    background: #fdfdfd;
+  }
+  .modal-body tr:nth-child(even) td {
+    background: #f7f9fb;
+  }
+</style>
+
+  <!-- 🔜 Parte 4/4: JavaScript completo (tabs, cálculos, modales) aquí --><script>
+/* ========= Utilidades ========= */
+const $  = (s, r=document)=>r.querySelector(s);
+const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
+const toNum = v => Number(String(v ?? "").replace(',', '.').trim());
+const fmt = (n, d=2) => isFinite(n) ? n.toLocaleString('es-ES',{maximumFractionDigits:d}) : '—';
+
+/* ========= Tabs principales (centradas + activa azul por CSS) ========= */
+const mainTabs = [
+  { btn: '#tab-bobina', sec: '#sec-bobina' },
+  { btn: '#tab-resma',  sec: '#sec-resma'  },
+  { btn: '#tab-tipos',  sec: '#sec-tipos'  },
+];
+mainTabs.forEach(({btn, sec})=>{
+  const b = $(btn), s = $(sec);
+  if(!b||!s) return;
+  b.addEventListener('click', ()=>{
+    mainTabs.forEach(({btn:bb, sec:ss})=>{
+      const ob = $(bb), os = $(ss);
+      const active = (bb === btn);
+      ob.setAttribute('aria-selected', active);
+      os.hidden = !active;
+    });
+  });
+});
+
+/* ========= Subpestañas RESMADO (centradas + activa azul) ========= */
+const resmaTabs = [
+  { btn: '#tab-peso-resma',    sec: '#sub-peso-resma' },
+  { btn: '#tab-pliegos-peso',  sec: '#sub-pliegos-peso' },
+  { btn: '#tab-pliegos-bobina',sec: '#sub-pliegos-bobina' },
+];
+resmaTabs.forEach(({btn, sec})=>{
+  const b = $(btn), s = $(sec);
+  if(!b||!s) return;
+  b.addEventListener('click', ()=>{
+    resmaTabs.forEach(({btn:bb, sec:ss})=>{
+      const ob = $(bb), os = $(ss);
+      const active = (bb === btn);
+      ob.setAttribute('aria-selected', active);
+      ob.classList.toggle('active', active); // azul activo
+      os.hidden = !active;
+    });
+  });
+});
+
+/* ========= Subpestañas TIPOS (centradas + activa azul) ========= */
+const tiposTabs = [
+  { btn: '#tab-t-virgenes',   sec: '#tipos-virgenes' },
+  { btn: '#tab-t-reciclados', sec: '#tipos-reciclados' },
+  { btn: '#tab-t-tecnicos',   sec: '#tipos-tecnicos' },
+  { btn: '#tab-t-guia',       sec: '#tipos-guia' },
+];
+tiposTabs.forEach(({btn, sec})=>{
+  const b = $(btn), s = $(sec);
+  if(!b||!s) return;
+  b.addEventListener('click', ()=>{
+    tiposTabs.forEach(({btn:bb, sec:ss})=>{
+      const ob = $(bb), os = $(ss);
+      const active = (bb === btn);
+      ob.setAttribute('aria-selected', active);
+      ob.classList.toggle('active', active); // azul activo
+      os.hidden = !active;
+    });
+  });
+});
+
+/* ========= Cálculos — Bobina ========= */
+// Resultados centrados, fondo azul claro, iconos ⚖️ ✋ 📏
+const resBobina = $('#res-bobina');
+
+function calcBobina(){
+  const g  = toNum($('#gramaje').value);   // g/m²
+  const eU = toNum($('#espesor').value);   // µm
+  const aM = toNum($('#ancho').value);     // mm
+  const Dm = toNum($('#diametro').value);  // mm
+  const dm = toNum($('#mandril').value);   // mm
+  if(![g,eU,aM,Dm,dm].every(isFinite)){ resBobina.innerHTML=''; return; }
+
+  const w = aM/1000;         // m
+  const D = Dm/1000, d = dm/1000; // m
+  const t = eU/1e6;          // m
+
+  // L = (π/4) * (D^2 - d^2) / t
+  const L = (Math.PI/4) * (D*D - d*d) / t;  // m
+  const peso = g*w*L/1000;                  // kg
+  const mano = eU/g;                        // adim
+
+  resBobina.innerHTML = `
+    <div class="result"><strong>⚖️ Peso de la bobina:</strong><br>${fmt(peso,2)} kg</div>
+    <div class="result"><strong>✋ Mano del papel:</strong><br>${fmt(mano,3)}</div>
+    <div class="result"><strong>📏 Metros lineales:</strong><br>${fmt(L,2)} m</div>
+  `;
+}
+$('#calc-bobina').addEventListener('click', calcBobina);
+$('#reset-bobina').addEventListener('click', ()=>{
+  ['gramaje','espesor','ancho','diametro','mandril'].forEach(id=>$('#'+id).value='');
+  resBobina.innerHTML='';
+});
+
+/* ========= Cálculos — Resmado ========= */
+// 1) Peso de la resma
+$('#calc-resma').addEventListener('click', ()=>{
+  const g = toNum($('#r-gramaje').value);
+  const a = toNum($('#r-ancho').value)/1000;  // m
+  const l = toNum($('#r-largo').value)/1000;  // m
+  const n = toNum($('#r-pliegos').value);
+  const out = $('#res-resma');
+  if(![g,a,l,n].every(isFinite)){ out.innerHTML=''; return; }
+  const area = a*l;                    // m²/hoja
+  const pesoHoja = g*area/1000;        // kg
+  const total = pesoHoja*n;            // kg
+  out.innerHTML = `
+    <div class="result"><strong>⚖️ Peso por hoja:</strong><br>${fmt(pesoHoja,3)} kg</div>
+    <div class="result"><strong>📦 Peso total resma:</strong><br>${fmt(total,2)} kg</div>
+  `;
+});
+$('#reset-resma').addEventListener('click', ()=>{
+  ['r-gramaje','r-ancho','r-largo','r-pliegos'].forEach(id=>$('#'+id).value='');
+  $('#res-resma').innerHTML='';
+});
+
+// 2) Nº pliegos por peso
+$('#calc-pliegos-peso').addEventListener('click', ()=>{
+  const g  = toNum($('#pp-gramaje').value);
+  const a  = toNum($('#pp-ancho').value)/1000;
+  const l  = toNum($('#pp-largo').value)/1000;
+  const kg = toNum($('#pp-peso').value);
+  const out = $('#res-pliegos-peso');
+  if(![g,a,l,kg].every(isFinite)){ out.innerHTML=''; return; }
+  const pesoHoja = g*a*l/1000;   // kg
+  const n = kg / pesoHoja;
+  out.innerHTML = `
+    <div class="result"><strong>⚖️ Peso por hoja:</strong><br>${fmt(pesoHoja,3)} kg</div>
+    <div class="result"><strong>📄 Nº de pliegos:</strong><br>${fmt(n,0)}</div>
+  `;
+});
+$('#reset-pliegos-peso').addEventListener('click', ()=>{
+  ['pp-gramaje','pp-ancho','pp-largo','pp-peso'].forEach(id=>$('#'+id).value='');
+  $('#res-pliegos-peso').innerHTML='';
+});
+
+// 3) Nº pliegos desde bobina (sin merma)
+$('#calc-pliegos-bobina').addEventListener('click', ()=>{
+  const m   = toNum($('#pb-metros').value);
+  const Lmm = toNum($('#pb-largo').value);
+  const out = $('#res-pliegos-bobina');
+  if(![m,Lmm].every(isFinite)){ out.innerHTML=''; return; }
+  const Lm = Lmm/1000;        // m por pliego
+  const n  = m / Lm;
+  out.innerHTML = `
+    <div class="result"><strong>📏 Metros totales:</strong><br>${fmt(m,2)} m</div>
+    <div class="result"><strong>📄 Nº de pliegos:</strong><br>${fmt(n,0)}</div>
+  `;
+});
+$('#reset-pliegos-bobina').addEventListener('click', ()=>{
+  ['pb-metros','pb-largo'].forEach(id=>$('#'+id).value='');
+  $('#res-pliegos-bobina').innerHTML='';
+});
+
+/* ========= MODAL Tipos de papel ========= */
+const modal       = $('#modal');
+const modalTitle  = $('#modal-title');
+const modalBody   = $('#modal-body');
+const modalCloseT = $('#modal-close');
+
+modalCloseT.addEventListener('click', ()=> modal.close());
+modal.addEventListener('click', (e)=>{ if(e.target === modal) modal.close(); });
+
+// Dataset con información COMPLETA (según tus tablas)
+const TYPE_INFO = {
+  "GT1 / SBS": {
+    titulo: "GT1 / SBS — Solid Bleached Board",
+    filas: [
+      ["Código / familia", "GT1 / SBS"],
+      ["Nombre industrial típico", "Solid Bleached Board (SBS)"],
+      ["Estructura / Estucado", "100% fibra química virgen blanqueada; C2S (estucado a 2 caras)"],
+      ["Características clave", "Máxima blancura y suavidad, imprimibilidad top, admite stamping/laminado"],
+      ["Usos típicos", "Lujo: perfumes, chocolates, cosmética premium"],
+    ]
+  },
+  "GC1 (FBB)": {
+    titulo: "GC1 (FBB) — Folding Boxboard doble estucado",
+    filas: [
+      ["Código / familia", "GC1 (FBB)"],
+      ["Nombre industrial típico", "Folding Boxboard doble estucado"],
+      ["Estructura / Estucado", "Multicapa virgen; capa sup. blanca + núcleo mecánico blanqueado; C2S"],
+      ["Características clave", "Alta rigidez con poco peso (alta mano), muy buena impresión por ambas caras"],
+      ["Usos típicos", "Cosmética/farma premium, envases que imprimen interior"],
+    ]
+  },
+  "GC2 (FBB)": {
+    titulo: "GC2 (FBB) — Folding Boxboard simple estucado",
+    filas: [
+      ["Código / familia", "GC2 (FBB)"],
+      ["Nombre industrial típico", "Folding Boxboard simple estucado"],
+      ["Estructura / Estucado", "Igual a GC1 pero C1S (solo cara superior); dorso crema/natural"],
+      ["Características clave", "Muy buena imprimibilidad en anverso; opción más económica que GC1"],
+      ["Usos típicos", "Alimentación seca, farma, cosmética estándar"],
+    ]
+  },
+  "GK / SU": {
+    titulo: "GK / SU — Kraft Board / Solid Unbleached",
+    filas: [
+      ["Código / familia", "GK / SU"],
+      ["Nombre industrial típico", "Kraft Board / Solid Unbleached"],
+      ["Estructura / Estucado", "Fibra virgen sin blanquear, sin estuco"],
+      ["Características clave", "Marrón natural, muy resistente al rasgado, aspecto rústico"],
+      ["Usos típicos", "Bolsas, sacos, bandejas, cajas “eco”"],
+    ]
+  },
+  "Woodfree / Bond": {
+    titulo: "Woodfree / Bond / Offset virgen",
+    filas: [
+      ["Nombre industrial", "Woodfree Uncoated (WFU), Bond"],
+      ["Estructura / Estucado", "No estucado"],
+      ["Características clave", "Alta blancura y opacidad, buen secado en offset/laser"],
+      ["Usos típicos", "Papelería, libros, formularios"],
+    ]
+  },
+  "GD2 (WLC)": {
+    titulo: "GD2 (WLC) — White Lined Chipboard – Greyback",
+    filas: [
+      ["Estructura / Estucado", "Multicapa reciclada; C1S (cara blanca estucada), dorso gris"],
+      ["Características clave", "Buena impresión en una cara; rigidez media; económico"],
+      ["Usos típicos", "Cajas de cereales, juguetes, housings"],
+    ]
+  },
+  "GD3 (WLC)": {
+    titulo: "GD3 (WLC) — WLC económico",
+    filas: [
+      ["Estructura / Estucado", "Similar a GD2 con menor blancura/gramaje"],
+      ["Características clave", "Aún más económico; para tiradas estándar"],
+      ["Usos típicos", "Packaging secundario"],
+    ]
+  },
+  "GT2 / GD1": {
+    titulo: "GT2 / GD1 — White Back Chipboard",
+    filas: [
+      ["Estructura / Estucado", "Reciclado con dorso blanco; C1S"],
+      ["Características clave", "Mejor presentación que GD2; coste medio"],
+      ["Usos típicos", "Cosmética/retail económico"],
+    ]
+  },
+  "TL / RKL": {
+    titulo: "TL / RKL — Testliner / Recycled Kraftliner",
+    filas: [
+      ["Estructura / Estucado", "Reciclado (a veces con refuerzo virgen), sin estuco"],
+      ["Características clave", "Marrón claro; buena resistencia para corrugado"],
+      ["Usos típicos", "Liner de cartón ondulado, cajas logísticas"],
+    ]
+  },
+  "Chipboard / CC": {
+    titulo: "Chipboard / CC — Cartón gris (sin estuco) / Coated Chipboard",
+    filas: [
+      ["Estructura / Estucado", "100% reciclado, denso"],
+      ["Características clave", "Rugoso, muy económico; versión CC agrega capa blanca"],
+      ["Usos típicos", "Tapas de bloc, carpetas, encuadernación"],
+    ]
+  },
+  "NP / RNP": {
+    titulo: "NP / RNP — Newsprint reciclado",
+    filas: [
+      ["Estructura / Estucado", "Pulpa mecánica reciclada; no estucado"],
+      ["Características clave", "Gramaje bajo, alta porosidad, blancura baja"],
+      ["Usos típicos", "Periódicos, catálogos masivos"],
+    ]
+  },
+  "Térmico blanco": {
+    titulo: "Soporte térmico blanco (Thermal Top / ZM7, ZM9)",
+    filas: [
+      ["Tipo", "Térmico directo"],
+      ["Características", "Capa termosensible; imprime con calor; puede llevar “top coat” protector"],
+      ["Usos típicos", "Tickets POS, balanzas, etiquetas logísticas"],
+    ],
+    nota: "Familia funcional: prioriza sensibilidad térmica, durabilidad y protección (top coat)."
+  },
+  "Térmico color": {
+    titulo: "Soporte térmico de color",
+    filas: [
+      ["Tipo", "Térmico directo coloreado"],
+      ["Características", "Igual que el blanco, base amarilla/azul/rosa para codificación visual"],
+      ["Usos típicos", "Etiquetas de identificación/avisos"],
+    ],
+    nota: "La base coloreada facilita la clasificación visual y advertencias."
+  },
+  "Autoadhesivo blanco": {
+    titulo: "Papel autoadhesivo blanco (vellum)",
+    filas: [
+      ["Tipo", "Adhesivo + liner siliconado"],
+      ["Características", "Papel blanco no estucado con adhesivo permanente/removible"],
+      ["Usos típicos", "Etiquetas de producto y logística"],
+    ],
+    nota: "Elección del adhesivo (permanente/removible/freezer) es clave."
+  },
+  "Couché autoadhesivo": {
+    titulo: "Papel couché autoadhesivo (C1S/C2S)",
+    filas: [
+      ["Tipo", "Adhesivo + liner siliconado"],
+      ["Características", "Estucado brillante/mate para alta calidad de impresión"],
+      ["Usos típicos", "Etiquetas premium, botellas, cosmética"],
+    ],
+    nota: "Añadir barnices/laminados para resistencia a humedad y roce."
+  },
+  "Autoadhesivo color": {
+    titulo: "Papel autoadhesivo de color / fluorescente",
+    filas: [
+      ["Tipo", "Adhesivo coloreado"],
+      ["Características", "Base teñida (neón o colores sólidos)"],
+      ["Usos típicos", "Señalización, promociones, advertencias"],
+    ],
+    nota: "Excelente para visibilidad; vigilar legibilidad del texto."
+  },
+};
+
+// Abrir modal con info completa
+function openTypeModal(key){
+  const data = TYPE_INFO[key];
+  if(!data) return;
+  modalTitle.textContent = data.titulo;
+
+  const rows = data.filas.map(([k,v]) =>
+    `<tr><th scope="row">${k}</th><td>${v}</td></tr>`
+  ).join('');
+
+  modalBody.innerHTML = `
+    <table>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+    ${data.nota ? `<div class="note" style="margin-top:12px">${data.nota}</div>` : ``}
+    <div style="display:flex;justify-content:center;margin-top:16px">
+      <button id="modal-close-bottom" class="btn">Cerrar</button>
+    </div>
+  `;
+
+  // Botón extra de cerrar (abajo)
+  $('#modal-close-bottom', modal).addEventListener('click', ()=> modal.close());
+
+  modal.showModal();
+}
+
+// Vincular botones de tipos
+$$('.type-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const key = btn.getAttribute('data-tipo');
+    openTypeModal(key);
+  });
+});
+
+/* ========= PWA Service Worker ========= */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+  });
+}
+</script>
+
+</body>
+</html>
