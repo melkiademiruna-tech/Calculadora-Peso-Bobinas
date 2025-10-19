@@ -1,0 +1,63 @@
+📄 CALCULADORAS DE PAPEL — VERSIÓN 5 (APROBADA)
+Fecha: 2025-10-19
+Autor: Mihai Florea — Perellón S.L.
+
+-----------------------------------------
+🔷 RESUMEN GENERAL
+-----------------------------------------
+Versión 5 aprobada como versión estable y funcional de la calculadora de papel.
+Basada íntegramente en la versión 4, con idéntico diseño, comportamiento y fórmulas,
+añadiendo una nueva pestaña educativa “Tipos de papel”.
+
+-----------------------------------------
+🧮 FUNCIONALIDADES PRINCIPALES
+-----------------------------------------
+1️⃣ Bobina de papel
+   - Cálculo del peso de la bobina a partir de gramaje, espesor, ancho, diámetro y mandril.
+   - Resultados: Peso ⚖️, Mano ✋ y Metros lineales 📏.
+   - Resultados centrados, fondo azul claro (#1d7fd9) con borde blanco y texto blanco.
+
+2️⃣ Papel resmado
+   - Tres subpestañas: 
+       • Peso de la resma
+       • Nº de pliegos por peso
+       • Nº de pliegos desde bobina
+   - Resultados centrados, con iconos visuales.
+   - Eliminado el campo “Merma (%) — opcional”.
+
+3️⃣ Tipos de papel (nuevo apartado educativo)
+   - Fondo beige (#f9f2e7) estilo didáctico.
+   - Cuatro subpestañas centradas:
+       🌲 Fibras vírgenes  
+       ♻️ Fibras recicladas  
+       🧩 Papeles técnicos y autoadhesivos  
+       📘 Guía rápida
+   - Botones por tipo de papel con colores temáticos (turquesa, verde, naranja, gris azulado).
+   - Pop-ups con información técnica completa (estructura, características, usos).
+   - Botón “Cerrar” tanto arriba como abajo del modal.
+
+-----------------------------------------
+🎨 DISEÑO Y ESTILO
+-----------------------------------------
+- Encabezado con icono (izquierda) y degradado azul original.
+- Pestañas y subpestañas centradas; activas en azul (#0a67b5).
+- Botones principales en naranja (#ff7a00).
+- Resultados en cuadros azules claros (#1d7fd9) con borde blanco semitransparente.
+- Inputs numéricos (solo teclado de números).
+- Footer fijo, centrado: © Mihai Florea — Perellón S.L.
+
+-----------------------------------------
+⚙️ TECNOLOGÍA Y ESTRUCTURA
+-----------------------------------------
+- HTML5 + CSS3 + JavaScript (sin dependencias externas).
+- PWA con manifest.json e iconos (icon-192.png / icon-512.png).
+- Service Worker activo para uso offline.
+- Archivo único: index_v5_3.html (versión aprobada).
+- Versiones anteriores (v4.x) conservadas como referencia estable.
+
+-----------------------------------------
+✅ ESTADO FINAL
+-----------------------------------------
+✔️ Versión 5 completamente funcional.
+✔️ Validada visualmente y en cálculos por Mihai Florea.
+✔️ Base oficial para futuras actualizaciones.
